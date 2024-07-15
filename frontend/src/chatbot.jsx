@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, TextField, IconButton, Paper, List, ListItem, ListItemText, Typography, Modal, Button } from '@mui/material';
+import { Box, TextField, IconButton, Paper, List, ListItem, ListItemText, Avatar, Typography, CircularProgress, Modal, Button } from '@mui/material';
 import axios from 'axios';
 import SendIcon from '@mui/icons-material/Send';
 import ImageIcon from '@mui/icons-material/Image';
@@ -10,12 +10,17 @@ const Chatbot = () => {
   const [image, setImage] = useState(null);
   const [imageName, setImageName] = useState('');
   const [openModal, setOpenModal] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleSend = async () => {
-    if (input && image) {
+    if (input || image) {
+      setLoading(true);
+
       const formData = new FormData();
       formData.append('text', input);
-      formData.append('image', image);
+      if (image) {
+        formData.append('image', image);
+      }
 
       try {
         const response = await axios.post('http://localhost:3001/upload', formData, {
@@ -29,6 +34,8 @@ const Chatbot = () => {
         setImageName('');
       } catch (error) {
         console.error('Error uploading data:', error);
+      } finally {
+        setLoading(false); 
       }
     }
   };
@@ -54,6 +61,7 @@ const Chatbot = () => {
         <List>
           {messages.map((message, index) => (
             <ListItem key={index} sx={{ backgroundColor: "#ebebeb", mb: 1, borderRadius: 2 }}>
+              <Avatar src={message.image ? URL.createObjectURL(message.image) : null} alt="" sx={{ mr: 1 }} />
               <ListItemText
                 primary={message.text}
                 secondary={
@@ -89,34 +97,19 @@ const Chatbot = () => {
             <ImageIcon />
           </IconButton>
         </label>
-        <IconButton color="primary" onClick={handleSend}>
-          <SendIcon />
-        </IconButton>
+        {loading ? ( 
+          <CircularProgress size={24} style={{ marginLeft: 16 }} />
+        ) : (
+          <IconButton color="primary" onClick={handleSend}>
+            <SendIcon />
+          </IconButton>
+        )}
       </Box>
       {imageName && (
         <Typography variant="body2" color="textSecondary" style={{ marginTop: 8 }}>
           {`Image to be uploaded: ${imageName}`}
         </Typography>
       )}
-
-      <Modal
-        open={openModal}
-        onClose={handleModalClose}
-        aria-labelledby="image-modal-title"
-        aria-describedby="image-modal-description"
-      >
-        <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '80%', maxWidth: 600, bgcolor: 'background.paper', boxShadow: 24, p: 4, borderRadius: 2 }}>
-          <Typography variant="h6" id="image-modal-title" gutterBottom>
-            Image Preview
-          </Typography>
-          <img src={image ? URL.createObjectURL(image) : ''} alt="Preview" style={{ maxWidth: '100%', maxHeight: '60vh', objectFit: 'contain' }} />
-          <Box sx={{ mt: 2 }}>
-            <Button onClick={handleModalClose} variant="contained" color="primary">
-              Close
-            </Button>
-          </Box>
-        </Box>
-      </Modal>
     </Box>
   );
 };
