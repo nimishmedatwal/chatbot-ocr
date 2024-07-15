@@ -58,7 +58,6 @@ Before running the application, ensure you have the following installed and set 
      **Server (`server/.env`):**
 
      ```plaintext
-     PORT=3001  # Port on which server will run
      MONGODB_URI=<your_mongodb_connection_uri>
      OPENAI_API_KEY=<your_openai_api_key>
      ```
