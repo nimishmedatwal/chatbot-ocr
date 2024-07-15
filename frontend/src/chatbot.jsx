@@ -56,7 +56,9 @@ const Chatbot = () => {
   };
 
   return (
-    <Box display="flex" flexDirection="column" height="80vh" boxShadow={1} padding={2} borderRadius={2}>
+    <>
+    <Typography variant='h4' color="white">Chatbot with OCR</Typography>
+    <Box display="flex" flexDirection="column" height="80vh" boxShadow={1} padding={2} borderRadius={2} backgroundColor="white">
       <Paper elevation={1} style={{ padding: 16, marginBottom: 16, flexGrow: 1, overflow: 'auto' }}>
         <List>
           {messages.map((message, index) => (
@@ -78,7 +80,7 @@ const Chatbot = () => {
       <Box display="flex" alignItems="center">
         <TextField
           variant="outlined"
-          placeholder="Give your image a heading..."
+          placeholder="Send a message..."
           fullWidth
           value={input}
           onChange={(e) => setInput(e.target.value)}
@@ -111,6 +113,7 @@ const Chatbot = () => {
         </Typography>
       )}
     </Box>
+    </>
   );
 };
 

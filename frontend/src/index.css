@@ -47,6 +47,8 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  background: url(https://static.vecteezy.com/system/resources/previews/001/427/158/large_2x/abstract-classic-blue-background-free-vector.jpg);
+  background-size: cover;
 }
 
 h1 {
