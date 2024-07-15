@@ -3,6 +3,7 @@ const express = require('express');
 const multer = require('multer');
 const Tesseract = require('tesseract.js');
 const mongoose = require('mongoose');
+const cors = require('cors');
 const ImageResult = require('./models/ImageResult');
 const dotenv = require('dotenv');
 
@@ -12,7 +13,7 @@ dotenv.config();
 const app = express();
 const port = 3001;
 
-// Middleware to parse JSON bodies
+app.use(cors());
 app.use(express.json());
 
 // Connect to MongoDB Atlas
@@ -28,6 +29,7 @@ const upload = multer({ storage: storage });
 app.post('/upload', upload.single('image'), (req, res) => {
   const textData = req.body.text;
   const imageData = req.file;
+  const imageName = req.file.originalname;
 
   if (!imageData) {
     return res.status(400).send('No image uploaded');
@@ -41,6 +43,7 @@ app.post('/upload', upload.single('image'), (req, res) => {
         textData,
         extractedText: text,
         imageData: imageData.buffer,
+        imageName: imageName,
       });
       await newImageResult.save();
 
