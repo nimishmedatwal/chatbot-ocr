@@ -6,9 +6,12 @@ const cors = require('cors');
 const ImageResult = require('./models/ImageResult');
 const dotenv = require('dotenv');
 const axios = require('axios');
+const { AzureOpenAI } = require("openai");
+const endpoint = process.env["AZURE_OPENAI_ENDPOINT"] ;
+const apiKey = process.env["AZURE_OPENAI_API_KEY"];
+const apiVersion = "2024-04-01-preview";
+const deployment = "openaitest";
 
-
-// Load environment variables from .env file
 dotenv.config();
 
 const app = express();
@@ -38,6 +41,7 @@ app.post('/upload', upload.single('image'), async (req, res) => {
     if (textData && !imageData) {
       // Handle text input with AI response (using GPT-3)
       const aiResponse = await generateAIResponse(textData);
+      console.log(aiResponse);
       res.json({ inputText: textData, response: aiResponse });
     } else if (imageData) {
       // Handle image upload with text extraction
@@ -69,25 +73,26 @@ app.post('/upload', upload.single('image'), async (req, res) => {
 });
 
 async function generateAIResponse(inputText) {
-  const OPENAI_API_KEY = process.env.OPENAI_API_KEY
-  axios.post('https://api.openai.com/v1/chat/completions', {
-    messages: [
-      { role: 'user', content: inputText }
-    ],
-    model: 'gpt-3.5-turbo',
-    temperature: 0.7
-  }, {
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${OPENAI_API_KEY}`
-    }
-  })
-  .then(response => {
-    console.log('Response:', response.data);
-  })
-  .catch(error => {
-    console.error('Error:', error.response.data);
-  });
+  try {
+    const client = new AzureOpenAI({
+      endpoint: process.env.AZURE_OPENAI_ENDPOINT,
+      apiKey: process.env.AZURE_OPENAI_API_KEY,
+      apiVersion: apiVersion
+    });
+
+    const response = await client.chat.completions.create({
+      model: deployment,
+      messages:  [
+        { role: "system", content: "You are a helpful assistant ." },
+        { role: "user", content: `${inputText}` },  
+      ],
+    });
+  const resAi= response.choices[0].message.content;
+  return resAi;
+  } catch (error) {
+    console.error('Error generating AI response:', error);
+    throw new Error('Error generating AI response');
+  }
 }
 
 
